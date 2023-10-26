@@ -1,0 +1,103 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity lab4 is
+	port(
+		button, reset, clk: in STD_LOGIC;
+		RAG, count: out STD_LOGIC_VECTOR(2 downto 0)
+		);
+end lab4;
+
+architecture functional of lab4 is 
+	type state is(start, first, second, third);
+	signal current_state, next_state: state;
+	signal q1, q2, button_e, e, f: std_logic;
+	signal count_s: unsigned(2 downto 0);
+	
+	
+	begin
+	
+	count <= std_logic_vector(count_s);
+	
+	-- edge detector
+	dff1: process(clk,reset)
+	begin
+		if reset = '1' then
+			q1 <= '0';
+			q2 <= '0';
+		elsif clk'event and clk = '1' then
+			q1 <= button;
+			q2 <= q1;
+		end if;
+	end process dff1;
+	
+	button_e <= (not(q2)) and (q1);
+	
+	-- timer
+	f <= '1' when count_s = "100" else '0';
+	
+	timer:process(clk,reset,e,count_s)
+	begin
+		if reset = '1' then
+			count_s <= (others=> '0');
+		elsif clk'event and clk = '1' then
+			if e = '1' then
+				if count_s = "100" then
+					count_s <= "000";
+				else
+					count_s <= count_s + 1;
+				end if;
+			end if;
+		end if;
+	end process timer;
+	
+	-- fsm
+	sequential: process(clk, reset)
+		begin
+		if reset = '1' then
+			current_state <= start;
+		elsif clk'EVENT AND clk='1' then
+			current_state <= next_state;
+		end if;
+	end process sequential;
+	
+	fsm: process(current_state, button_e, f)
+		begin 
+		case current_state is
+			when start =>
+				RAG <= "001";
+				e <= '0';
+				
+				if button_e = '0' then
+					next_state <= current_state;
+				else
+					e <= '1';
+					next_state <= first;
+				end if;
+			
+			when first =>
+				if f = '0' then
+					next_state <= current_state;
+				else
+					next_state <= second;
+				end if; 
+			
+			when second =>
+				RAG <= "010";
+				if f = '0' then
+					next_state <= current_state;
+				else
+					next_state <= third;
+				end if; 
+				
+			when third =>
+				RAG <= "100";
+				if f = '0' then
+					next_state <= current_state;
+				else
+					next_state <= start;
+				end if; 
+		end case;
+	end process fsm;
+end functional;

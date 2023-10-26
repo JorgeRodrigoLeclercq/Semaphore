@@ -1,0 +1,20 @@
+|Lab4
+button => fsm~0.IN0
+button => Selector5.IN3
+button => e.DATAIN
+reset => count_s[0].ACLR
+reset => count_s[1].ACLR
+reset => count_s[2].ACLR
+reset => current_state~1.IN1
+clk => count_s[0].CLK
+clk => count_s[1].CLK
+clk => count_s[2].CLK
+clk => current_state~0.IN1
+RAG[0] <= RAG[0]$latch.DB_MAX_OUTPUT_PORT_TYPE
+RAG[1] <= RAG[1]$latch.DB_MAX_OUTPUT_PORT_TYPE
+RAG[2] <= RAG[2]$latch.DB_MAX_OUTPUT_PORT_TYPE
+count[0] <= count_s[0].DB_MAX_OUTPUT_PORT_TYPE
+count[1] <= count_s[1].DB_MAX_OUTPUT_PORT_TYPE
+count[2] <= count_s[2].DB_MAX_OUTPUT_PORT_TYPE
+
+
